@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  # Ollama container (model server)
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      # Bind Ollama to localhost only on the host to avoid exposing it publicly
+      - "127.0.0.1:11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://127.0.0.1:11434/v1/models"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Backend API (FastAPI) — exposes /rag and /health
+  backend:
+    build: .
+    container_name: rag_backend
+    command: uvicorn backend_server:app --host 0.0.0.0 --port 8000 --workers 1
+    restart: unless-stopped
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - BACKEND_API_KEY=${BACKEND_API_KEY:-change_me}
+      - OLLAMA_URL=http://ollama:11434
+      - CHROMA_DB_DIR=/data/chroma_db
+    volumes:
+      - ./:/app
+      - chroma_db:/app/chroma_db
+      - sqlite_db:/app/agent_data.db
+    ports:
+      - "8000:8000"   # Should be proxied via nginx in production
+
+  # Streamlit frontend (calls backend)
+  app:
+    build: .
+    container_name: rag_streamlit
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      - BACKEND_URL=http://backend:8000
+      - BACKEND_API_KEY=${BACKEND_API_KEY:-change_me}
+    volumes:
+      - ./:/app
+      - chroma_db:/app/chroma_db
+      - sqlite_db:/app/agent_data.db
+    ports:
+      - "8501:8501"   # public UI port (can be proxied via nginx too)
+
+volumes:
+  ollama_data:
+  chroma_db:
+  sqlite_db:
