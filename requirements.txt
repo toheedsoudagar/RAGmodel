@@ -1,0 +1,53 @@
+# ---------------------------
+# Streamlit UI
+# ---------------------------
+streamlit
+python-dotenv
+requests
+
+# ---------------------------
+# LangChain RAG + Ollama
+# ---------------------------
+langchain
+langchain-community
+langchain-core
+langchain-chroma
+langchain-ollama
+ollama   # python client to call ollama server
+
+# ---------------------------
+# Vector Database
+# ---------------------------
+chromadb
+
+# ---------------------------
+# Document Loaders & Parsing
+# ---------------------------
+beautifulsoup4
+lxml
+markdown
+pypdf
+pdfminer.six
+python-docx
+unstructured
+Pillow
+
+# ---------------------------
+# OCR (for PDFs/images)
+# ---------------------------
+pytesseract
+pdf2image
+
+# ---------------------------
+# Database / SQL Agent
+# ---------------------------
+sqlalchemy
+pandas
+
+# ---------------------------
+# Utilities for RAG
+# ---------------------------
+tiktoken
+nltk
+numpy
+scikit-learn
